@@ -1,0 +1,86 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+boxes = [
+    {
+        :hostname => "k8s-master01",
+        :mem => "2048",
+        :cpu => 2,
+        :ipaddr => "10.10.10.10"
+    },
+    {
+        :hostname => "k8s-node01",
+        :mem => "2048",
+        :cpu => 2,
+        :ipaddr => "10.10.10.101"
+    },
+    {
+        :hostname => "k8s-node02",
+        :mem => "2048",
+        :cpu => 2,
+        :ipaddr => "10.10.10.102"
+    }
+]
+
+# ENV
+ENV["LC_ALL"] = "en_US.UTF-8"
+# All Vagrant configuration is done below.
+Vagrant.configure("2") do |config|
+  # OS版本选择
+  # config.vm.box = "CentOS-7.VMwareFusion"
+  config.vm.box = "AlmaLinux-9.VMwareFusion"
+  # config.vm.disk :dvd, name: "Tools", file: "D:/Program Files/Oracle/VirtualBox/VBoxGuestAdditions.iso"
+  # box proxy setting
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http     = "http://myproxy:3128/"
+    config.proxy.https    = "http://myproxy:3128/"
+    config.proxy.no_proxy = "localhost,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8"
+  end
+  boxes.each do |opts|
+    config.vm.define opts[:hostname] do |config|
+      # 配置hostname
+      config.vm.hostname = opts[:hostname]
+      # 配置网卡和IP
+      config.vm.network "private_network", ip: opts[:ipaddr]
+      # share folder
+      config.vm.synced_folder "../data", "/vagrant_data"
+      # 根据不同provide配置cpu mem
+      config.vm.provider "vmware_desktop" do |v|
+        v.vmx["memsize"] = opts[:mem]
+        v.vmx["numvcpus"] = opts[:cpu]
+        v.gui = true
+      end
+      config.vm.provider "virtualbox" do |v|
+        v.customize ["modifyvm", :id, "--memory", opts[:mem]]
+        v.customize ["modifyvm", :id, "--cpus", opts[:cpu]]
+        v.gui = true
+        if Vagrant.has_plugin?("vagrant-vbguest")
+          config.vbguest.auto_update = false
+        end
+      end
+      config.vm.provider "hyperv" do |v|
+        # 链接克隆，速度会快一点，可选
+        # v.enable_virtualization_extensions = true
+        # v.linked_clone = true
+        # 启用如下之后，可以通过Copy-VMFile拷贝文件到虚拟机
+        v.vm_integration_services = {
+            guest_service_interface: true  #<---------- this line enables Copy-VMFile
+        }
+        # 其他设置
+        v.cpus = opts[:cpu]
+        v.maxmemory = opts[:mem]
+        v.memory = "512"
+      end
+    end
+  end
+  # 额外shell脚本
+  # config.vm.provision "shell", privileged: false, path: "./setup.sh"
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+    echo $(date +%FT%T) shell begin
+    echo '10.10.10.10 k8s-master01' | sudo tee -a /etc/hosts
+    echo '10.10.10.101 k8s-node01' | sudo tee -a /etc/hosts
+    echo '10.10.10.102 k8s-node02' | sudo tee -a /etc/hosts
+  SHELL
+end
+
+# vagrant up --provider virtualbox
+# vagrant ssh-config > ~/.ssh/config

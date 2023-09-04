@@ -1,0 +1,39 @@
+# 虚拟机box镜像模板
+box: "AlmaLinux-8.VMwareFusion"
+
+# proxy settings for guest VM
+http_proxy: "http://myproxy:3128/"
+no_proxy: "localhost,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8"
+
+# domain
+domain: "example.com"
+
+# master node/control plane
+server:
+  # recommand: 1 / 3 / 5
+  count: 1
+  cpus: 2
+  memory: 2048
+
+# slave/worker node
+node:
+  # recommand: 2+
+  count: 2
+  cpus: 2
+  memory: 2048
+
+# client jumpserver/ansible/end-user
+client:
+  # recommand: 1
+  count: 1
+  cpus: 2
+  memory: 2048
+
+# ip settings for guest VM
+ip:
+  # server节点的第一个IP，后续IP会根据创建数量，自动加1, server-01.example.com, server-02.example.com ...
+  server: 172.17.17.11
+  # node节点的第一个IP，后续IP会根据创建数量，自动加1
+  node:   172.17.17.101
+  # client节点的第一个IP，后续IP会根据创建数量，自动加1
+  client: 172.17.17.5

@@ -1,0 +1,86 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# ENV
+ENV["LC_ALL"] = "en_US.UTF-8"
+
+# 参考 https://raw.githubusercontent.com/udemy-course/ansible-cn/master/awx/lab/Vagrantfile
+
+# All Vagrant configuration is done below.
+Vagrant.configure("2") do |config|
+
+  # OS模板选择， 必须，其他都是可选
+  # config.vm.box = "CentOS-7.VMwareFusion"
+  config.vm.box = "AlmaLinux-9.VMwareFusion"
+
+  # proxy setting
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http     = "http://myproxy:3128/"
+    config.proxy.https    = "http://myproxy:3128/"
+    config.proxy.no_proxy = "localhost,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8"
+  end
+
+  config.vm.hostname = "devops"
+
+  # 配置网卡和IP
+  # config.vm.network "private_network", ip: "172.17.17.17"
+  # 共享目录配置，禁用默认共享
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  # config.vm.synced_folder "../data", "/vagrant_data", disabled: true
+
+  # 根据不同provide配置cpu mem
+  config.vm.provider "vmware_desktop" do |v|
+    v.vmx["memsize"] = "4096"
+    v.vmx["numvcpus"] = "2"
+    v.gui = true
+  end
+
+  config.vm.provider "virtualbox" do |v|
+    v.customize ["modifyvm", :id, "--memory", "4096"]
+    v.customize ["modifyvm", :id, "--cpus", "2"]
+    v.gui = true
+    if Vagrant.has_plugin?("vagrant-vbguest")
+      config.vbguest.auto_update = false
+      # config.vbguest.iso_path = "https://mirrors.tuna.tsinghua.edu.cn/virtualbox/%{version}/VBoxGuestAdditions_%{version}.iso"
+    end
+  end
+
+  config.vm.provider "hyperv" do |v|
+    # 链接克隆，速度会快一点，可选
+    # v.enable_virtualization_extensions = true
+    # v.linked_clone = true
+    # 启用如下之后，可以通过Copy-VMFile拷贝文件到虚拟机
+    v.vm_integration_services = {
+        guest_service_interface: true  #<---------- this line enables Copy-VMFile
+    }
+    # 其他设置
+    v.cpus = "2"
+    v.maxmemory = "4096"
+    v.memory = "512"
+  end
+
+  # 额外shell脚本
+  # a. 单行shell脚本
+  # config.vm.provision "shell", privileged: false, path: "./setup.sh"
+  # b. 多行shell脚本
+  config.vm.provision "shell", run: "always", inline: <<-SHELL
+    echo $(date +%FT%T) shell begin
+    # sudo nmcli connection add type ethernet ifname ens160 ipv4.method manual ipv4.addresses 172.16.16.200/24 ipv4.gateway 172.16.16.2 ipv4.dns 172.16.16.2
+    # echo 'PermitRootLogin yes' | sudo tee -a /etc/ssh/sshd_config
+    # sudo service sshd restart
+    # echo vagrant | sudo passwd --stdin root
+    echo $(date +%FT%T) shell end
+  SHELL
+
+  # 在vm启动之后，本地执行的动作
+  config.trigger.after :up do |trigger|
+    # trigger.info = "Add ssh config in ~/.ssh/config"
+    # trigger.run = {inline: "vagrant ssh-config > ~/.ssh/config"}
+  end
+end
+
+# vagrant up --provider virtualbox
+
+# vagrant ssh-config | Out-File ~/.ssh/config # 直接 output有问题， 建议用如下两行
+# Add-Content "\n"  ~/.ssh/config
+# vagrant ssh-config | Add-Content ~/.ssh/config
+
