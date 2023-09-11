@@ -29,6 +29,9 @@ client:
   cpus: 2
   memory: 2048
 
+# use less disk space
+linked_clones: true
+
 # ip settings for guest VM
 ip:
   # server节点的第一个IP，后续IP会根据创建数量，自动加1, server-01.example.com, server-02.example.com ...
