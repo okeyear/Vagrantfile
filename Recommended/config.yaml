@@ -1,7 +1,7 @@
 # 虚拟机box镜像模板
 box: "AlmaLinux-8.VMwareFusion"
 
-# if provide eq virtualbox, please add route "route add 10.0.2.0/25 192.168.56.1"
+# if provide eq virtualbox, please add route "route add 10.0.2.0/24 192.168.56.1"
 # and then you can ssh to nat IPAddress directly.
 
 
