@@ -1,6 +1,10 @@
 # 虚拟机box镜像模板
 box: "AlmaLinux-8.VMwareFusion"
 
+# if provide eq virtualbox, please add route "route delete 10.0.2.0/25 192.168.56.1"
+# and then you can ssh to nat IPAddress directly.
+
+
 # proxy settings for guest VM
 http_proxy: "http://myproxy:3128/"
 no_proxy: "localhost,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8"
