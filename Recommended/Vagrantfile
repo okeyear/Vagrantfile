@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
         v.memory = c.fetch('memory')
         v.name = hostname
         v.gui = true
-        server.vm.network "private_network", ip: IPAddr.new('192.168.56.1'.to_i + i + 9, Socket::AF_INET).to_s
+        # server.vm.network "private_network", ip: IPAddr.new('192.168.56.1'.to_i + i + 9, Socket::AF_INET).to_s
         if Vagrant.has_plugin?("vagrant-vbguest")
           server.vbguest.auto_update = false
         end
@@ -114,7 +114,7 @@ Vagrant.configure(2) do |config|
         v.memory = c.fetch('memory')
         v.name = hostname
         v.gui = true
-        node.vm.network "private_network", ip: IPAddr.new('192.168.56.1'.to_i + i + 99, Socket::AF_INET).to_s
+        # node.vm.network "private_network", ip: IPAddr.new('192.168.56.1'.to_i + i + 99, Socket::AF_INET).to_s
         if Vagrant.has_plugin?("vagrant-vbguest")
           node.vbguest.auto_update = false
         end
@@ -181,7 +181,7 @@ Vagrant.configure(2) do |config|
         v.memory = c.fetch('memory')
         v.name = hostname
         v.gui = true
-        client.vm.network "private_network", ip: IPAddr.new('192.168.56.1'.to_i + i + 3, Socket::AF_INET).to_s
+        # client.vm.network "private_network", ip: IPAddr.new('192.168.56.1'.to_i + i + 3, Socket::AF_INET).to_s
         if Vagrant.has_plugin?("vagrant-vbguest")
           client.vbguest.auto_update = false
         end
